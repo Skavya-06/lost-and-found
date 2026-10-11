@@ -2,6 +2,18 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+// Generate JWT token helper
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET || "supersecretlostandfoundjwtkey_2026",
+    { expiresIn: "7d" }
+  );
+};
+
+// @desc    Register a new user
+// @route   POST /api/auth/register
+// @access  Public
 const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -10,7 +22,9 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Name, email, and password are required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     }
@@ -18,26 +32,45 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       password: hashedPassword,
       role: role === "admin" ? "admin" : "user",
     });
 
-    res.status(201).json({
-      message: "Registered",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    const token = generateToken(user);
+
+    return res.status(201).json({
+      message: "Registered successfully",
+      token,
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Register error:", error);
+    return res.status(500).json({ message: error.message || "Registration failed" });
   }
 };
 
+// @desc    Authenticate user & get token
+// @route   POST /api/auth/login
+// @access  Public
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -47,19 +80,48 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = generateToken(user);
 
-    res.json({
+    return res.json({
+      message: "Logged in successfully",
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Login error:", error);
+    return res.status(500).json({ message: error.message || "Login failed" });
   }
 };
 
-module.exports = { register, login };
+// @desc    Get current user profile
+// @route   GET /api/auth/me
+// @access  Private
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.json({
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("getMe error:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { register, login, getMe };
