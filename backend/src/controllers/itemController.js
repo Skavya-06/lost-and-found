@@ -1,12 +1,40 @@
 const mongoose = require("mongoose");
 const Item = require("../models/Item");
 
-// @desc    Get all items
+// @desc    Get all items with optional filters & search (Admin list / Catalog)
 // @route   GET /api/items
 // @access  Public
 const getItems = async (req, res) => {
   try {
-    const items = await Item.find()
+    const { type, status, category, search } = req.query;
+    const filter = {};
+
+    // Filter by type (LOST or FOUND)
+    if (type && type.toUpperCase() !== "ALL") {
+      filter.type = type.toUpperCase();
+    }
+
+    // Filter by status (OPEN, CLAIMED, CLOSED)
+    if (status && status.toUpperCase() !== "ALL") {
+      filter.status = status.toUpperCase();
+    }
+
+    // Filter by category
+    if (category && category !== "ALL" && category !== "All Categories") {
+      filter.category = { $regex: new RegExp(`^${category}$`, "i") };
+    }
+
+    // Search query matching title, description, or location
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { location: searchRegex },
+      ];
+    }
+
+    const items = await Item.find(filter)
       .populate("user", "name email role")
       .sort({ createdAt: -1 });
 
@@ -109,9 +137,9 @@ const createItem = async (req, res) => {
   }
 };
 
-// @desc    Update user's own item report
+// @desc    Update an item report
 // @route   PUT /api/items/:id
-// @access  Private (Owner)
+// @access  Private (Owner or Admin)
 const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -125,11 +153,13 @@ const updateItem = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    // Check ownership
+    // Check authorization: Owner or Admin
     const isOwner = item.user.toString() === req.user.id.toString();
-    if (!isOwner) {
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
-        message: "Forbidden: You are only allowed to update your own items",
+        message: "Forbidden: You are not authorized to update this item",
       });
     }
 
@@ -169,9 +199,43 @@ const updateItem = async (req, res) => {
   }
 };
 
-// @desc    Delete user's own item report
+// @desc    Update item status (Admin quick-update)
+// @route   PUT /api/items/:id/status
+// @access  Private (Admin)
+const updateItemStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    if (!status || !["OPEN", "CLAIMED", "CLOSED"].includes(status.toUpperCase())) {
+      return res.status(400).json({
+        message: "Status must be either OPEN, CLAIMED, or CLOSED",
+      });
+    }
+
+    const item = await Item.findById(id);
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    item.status = status.toUpperCase();
+    await item.save();
+
+    const updated = await Item.findById(item._id).populate("user", "name email role");
+    return res.json(updated);
+  } catch (error) {
+    console.error("updateItemStatus error:", error);
+    return res.status(500).json({ message: error.message || "Failed to update item status" });
+  }
+};
+
+// @desc    Delete item report
 // @route   DELETE /api/items/:id
-// @access  Private (Owner)
+// @access  Private (Owner or Admin)
 const deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -185,11 +249,13 @@ const deleteItem = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    // Check ownership
+    // Check authorization: Owner or Admin
     const isOwner = item.user.toString() === req.user.id.toString();
-    if (!isOwner) {
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
-        message: "Forbidden: You are only allowed to delete your own items",
+        message: "Forbidden: You are not authorized to delete this item",
       });
     }
 
@@ -208,5 +274,6 @@ module.exports = {
   getItemById,
   createItem,
   updateItem,
+  updateItemStatus,
   deleteItem,
 };
