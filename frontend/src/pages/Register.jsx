@@ -1,19 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import {
-  User,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  UserPlus,
-  AlertCircle,
-  CheckCircle,
-  ShieldCheck,
-  ArrowRight,
-  Compass,
-} from 'lucide-react';
+import { loginUser, registerUser, saveAuth } from '../api/auth';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -24,15 +11,13 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-
-  const { register, login, loading, error: authError, clearError } = useAuth();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError('');
     setSuccessMessage('');
-    clearError();
 
     if (!name.trim() || !email.trim() || !password) {
       setLocalError('All fields marked with an asterisk are required.');
@@ -49,29 +34,30 @@ export default function Register() {
       return;
     }
 
+    setLoading(true);
     try {
-      await register(name.trim(), email.trim(), password, role);
-      setSuccessMessage('Account registered successfully! Logging you in...');
-
-      // Automatically log the user in
-      setTimeout(async () => {
-        try {
-          await login(email.trim(), password);
-          if (role === 'admin') {
-            navigate('/admin', { replace: true });
-          } else {
-            navigate('/', { replace: true });
-          }
-        } catch {
-          navigate('/login', { replace: true });
-        }
-      }, 1200);
+      const result = await registerUser({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        role,
+      });
+      if (result.token && result.user) {
+        saveAuth(result.token, result.user);
+      } else {
+        const loginResult = await loginUser({ email: email.trim(), password });
+        saveAuth(loginResult.token, loginResult.user);
+      }
+      setSuccessMessage('Account registered successfully.');
+      navigate(role === 'admin' ? '/admin' : '/');
     } catch (err) {
-      console.error('Registration error:', err);
+      setLocalError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const displayedError = localError || authError;
+  const displayedError = localError;
 
   return (
     <div className="auth-page-wrapper">
@@ -79,7 +65,7 @@ export default function Register() {
         {/* Header */}
         <div className="auth-header">
           <div className="auth-icon-circle">
-            <Compass size={28} className="text-primary" />
+            
           </div>
           <h1 className="auth-title">Create an Account</h1>
           <p className="auth-subtitle">
@@ -90,7 +76,7 @@ export default function Register() {
         {/* Success Alert */}
         {successMessage && (
           <div className="alert alert-success">
-            <CheckCircle size={18} className="alert-icon" />
+            
             <div className="alert-content">{successMessage}</div>
           </div>
         )}
@@ -98,7 +84,7 @@ export default function Register() {
         {/* Error Alert */}
         {displayedError && !successMessage && (
           <div className="alert alert-error">
-            <AlertCircle size={18} className="alert-icon" />
+            
             <div className="alert-content">{displayedError}</div>
           </div>
         )}
@@ -110,7 +96,7 @@ export default function Register() {
               Full Name *
             </label>
             <div className="input-wrapper">
-              <User size={18} className="input-icon-left" />
+              
               <input
                 id="name"
                 type="text"
@@ -129,7 +115,7 @@ export default function Register() {
               Email Address *
             </label>
             <div className="input-wrapper">
-              <Mail size={18} className="input-icon-left" />
+              
               <input
                 id="email"
                 type="email"
@@ -148,7 +134,7 @@ export default function Register() {
               Password (min. 6 characters) *
             </label>
             <div className="input-wrapper">
-              <Lock size={18} className="input-icon-left" />
+              
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -165,7 +151,7 @@ export default function Register() {
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? 'Hide' : 'Show'}
               </button>
             </div>
           </div>
@@ -175,7 +161,7 @@ export default function Register() {
               Confirm Password *
             </label>
             <div className="input-wrapper">
-              <Lock size={18} className="input-icon-left" />
+              
               <input
                 id="confirmPassword"
                 type={showPassword ? 'text' : 'password'}
@@ -199,7 +185,7 @@ export default function Register() {
                 onClick={() => setRole('user')}
               >
                 <div className="role-option-header">
-                  <User size={18} />
+                  
                   <span className="role-option-title">Standard User</span>
                 </div>
                 <p className="role-option-desc">Report lost/found items and manage personal claims.</p>
@@ -211,7 +197,7 @@ export default function Register() {
                 onClick={() => setRole('admin')}
               >
                 <div className="role-option-header">
-                  <ShieldCheck size={18} />
+                  
                   <span className="role-option-title">Admin / Staff</span>
                 </div>
                 <p className="role-option-desc">Manage all reports, change item statuses & moderation.</p>
@@ -230,7 +216,7 @@ export default function Register() {
               </span>
             ) : (
               <span className="btn-loading-flex">
-                <UserPlus size={18} /> Register Now
+                 Register Now
               </span>
             )}
           </button>
@@ -241,7 +227,7 @@ export default function Register() {
           <span>Already have an account?</span>
           <Link to="/login" className="auth-link">
             <span>Sign in here</span>
-            <ArrowRight size={14} />
+            
           </Link>
         </div>
       </div>

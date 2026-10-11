@@ -1,22 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchMyItems, deleteItem, updateItemStatus } from '../api/items';
-import { useAuth } from '../context/AuthContext';
-import {
-  FolderClock,
-  PlusCircle,
-  Edit3,
-  Trash2,
-  ExternalLink,
-  CheckCircle2,
-  AlertCircle,
-  Tag,
-  MapPin,
-  Calendar,
-} from 'lucide-react';
+import { getUser } from '../api/auth';
 
 export default function MyItems() {
-  const { user } = useAuth();
+  const user = getUser();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,7 +15,7 @@ export default function MyItems() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchMyItems(user?.id);
+      const data = await fetchMyItems();
       setItems(data);
     } catch (err) {
       setError(err.message || 'Failed to load your reported items.');
@@ -36,8 +25,12 @@ export default function MyItems() {
   };
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     loadMyItems();
-  }, [user]);
+  }, []);
 
   const handleDelete = async (itemId) => {
     if (!window.confirm('Are you sure you want to delete this report?')) return;
@@ -77,7 +70,7 @@ export default function MyItems() {
       <div className="my-items-header">
         <div>
           <div className="items-header-badge">
-            <FolderClock size={14} />
+            
             <span>Personal Dashboard</span>
           </div>
           <h1 className="items-page-title">My Reported Items</h1>
@@ -86,7 +79,7 @@ export default function MyItems() {
           </p>
         </div>
         <Link to="/items/new" className="btn btn-primary btn-lg">
-          <PlusCircle size={18} />
+          
           <span>New Report</span>
         </Link>
       </div>
@@ -110,7 +103,7 @@ export default function MyItems() {
       {/* Error alert */}
       {error && (
         <div className="alert alert-error">
-          <AlertCircle size={18} />
+          
           <div>{error}</div>
         </div>
       )}
@@ -125,12 +118,12 @@ export default function MyItems() {
         /* Empty state */
         <div className="empty-items-state">
           <div className="empty-icon-wrap">
-            <FolderClock size={36} />
+            
           </div>
           <h3>You haven’t posted any reports yet</h3>
           <p>Misplaced something or found an item on campus? File a report in seconds.</p>
           <Link to="/items/new" className="btn btn-primary mt-3">
-            <PlusCircle size={16} />
+            
             <span>Create Your First Report</span>
           </Link>
         </div>
@@ -169,7 +162,7 @@ export default function MyItems() {
                         {item.status}
                       </span>
                       <span className="badge badge-secondary">
-                        <Tag size={11} /> {item.category}
+                         {item.category}
                       </span>
                     </div>
 
@@ -178,8 +171,8 @@ export default function MyItems() {
                     </h3>
 
                     <div className="my-item-meta">
-                      <span><MapPin size={13} /> {item.location}</span>
-                      <span><Calendar size={13} /> {item.date}</span>
+                      <span> {item.location}</span>
+                      <span> {item.date}</span>
                     </div>
                   </div>
                 </div>
@@ -193,16 +186,16 @@ export default function MyItems() {
                     disabled={actionId === itemId}
                     title="Toggle Claimed status"
                   >
-                    <CheckCircle2 size={14} />
+                    
                     <span>{item.status === 'CLAIMED' ? 'Mark Open' : 'Mark Claimed'}</span>
                   </button>
 
                   <Link to={`/items/${itemId}`} className="btn btn-ghost btn-sm" title="View details">
-                    <ExternalLink size={14} />
+                    
                   </Link>
 
                   <Link to={`/items/${itemId}/edit`} className="btn btn-secondary btn-sm" title="Edit">
-                    <Edit3 size={14} />
+                    
                   </Link>
 
                   <button
@@ -212,7 +205,7 @@ export default function MyItems() {
                     disabled={actionId === itemId}
                     title="Delete"
                   >
-                    <Trash2 size={14} />
+                    
                   </button>
                 </div>
               </div>

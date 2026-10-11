@@ -1,23 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchItems, updateItemStatus, deleteItem } from '../api/items';
-import { useAuth } from '../context/AuthContext';
-import {
-  ShieldCheck,
-  Search,
-  Filter,
-  Trash2,
-  ExternalLink,
-  RefreshCw,
-  CheckCircle2,
-  Clock,
-  Layers,
-  AlertCircle,
-  TrendingUp,
-} from 'lucide-react';
+import { getUser } from '../api/auth';
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const user = getUser();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,6 +31,10 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      navigate('/login');
+      return;
+    }
     loadAllItems();
   }, []);
 
@@ -77,36 +69,30 @@ export default function AdminDashboard() {
     }
   };
 
-  // Stats calculation
-  const stats = useMemo(() => {
-    const total = items.length;
-    const open = items.filter((i) => i.status === 'OPEN').length;
-    const claimed = items.filter((i) => i.status === 'CLAIMED').length;
-    const closed = items.filter((i) => i.status === 'CLOSED').length;
-    const lost = items.filter((i) => i.type === 'LOST').length;
-    const found = items.filter((i) => i.type === 'FOUND').length;
-    return { total, open, claimed, closed, lost, found };
-  }, [items]);
+  const total = items.length;
+  const open = items.filter((i) => i.status === 'OPEN').length;
+  const claimed = items.filter((i) => i.status === 'CLAIMED').length;
+  const closed = items.filter((i) => i.status === 'CLOSED').length;
+  const lost = items.filter((i) => i.type === 'LOST').length;
+  const found = items.filter((i) => i.type === 'FOUND').length;
+  const stats = { total, open, claimed, closed, lost, found };
 
-  // Filtered list
-  const filtered = useMemo(() => {
-    return items.filter((item) => {
-      if (typeFilter !== 'ALL' && item.type !== typeFilter) return false;
-      if (statusFilter !== 'ALL' && item.status !== statusFilter) return false;
-      if (search.trim()) {
-        const q = search.toLowerCase();
-        const t = item.title?.toLowerCase() || '';
-        const d = item.description?.toLowerCase() || '';
-        const l = item.location?.toLowerCase() || '';
-        const u = item.user?.name?.toLowerCase() || '';
-        const e = item.user?.email?.toLowerCase() || '';
-        if (!t.includes(q) && !d.includes(q) && !l.includes(q) && !u.includes(q) && !e.includes(q)) {
-          return false;
-        }
+  const filtered = items.filter((item) => {
+    if (typeFilter !== 'ALL' && item.type !== typeFilter) return false;
+    if (statusFilter !== 'ALL' && item.status !== statusFilter) return false;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      const t = item.title?.toLowerCase() || '';
+      const d = item.description?.toLowerCase() || '';
+      const l = item.location?.toLowerCase() || '';
+      const u = item.user?.name?.toLowerCase() || '';
+      const e = item.user?.email?.toLowerCase() || '';
+      if (!t.includes(q) && !d.includes(q) && !l.includes(q) && !u.includes(q) && !e.includes(q)) {
+        return false;
       }
-      return true;
-    });
-  }, [items, typeFilter, statusFilter, search]);
+    }
+    return true;
+  });
 
   return (
     <div className="admin-page-container">
@@ -114,7 +100,7 @@ export default function AdminDashboard() {
       <div className="admin-header-bar">
         <div>
           <div className="items-header-badge badge-admin-badge">
-            <ShieldCheck size={14} />
+            
             <span>Administrator Control Center</span>
           </div>
           <h1 className="admin-page-title">Campus Moderation & Reports</h1>
@@ -129,7 +115,7 @@ export default function AdminDashboard() {
             className="btn btn-secondary btn-sm"
             title="Refresh database"
           >
-            <RefreshCw size={14} className={loading ? 'spin-icon' : ''} />
+            
             <span>Refresh</span>
           </button>
         </div>
@@ -138,7 +124,7 @@ export default function AdminDashboard() {
       {/* Floating Status Toast */}
       {statusMessage && (
         <div className="alert alert-success admin-toast-alert">
-          <CheckCircle2 size={16} />
+          
           <span>{statusMessage}</span>
         </div>
       )}
@@ -146,7 +132,7 @@ export default function AdminDashboard() {
       {/* Error alert */}
       {error && (
         <div className="alert alert-error">
-          <AlertCircle size={18} />
+          
           <div>{error}</div>
         </div>
       )}
@@ -192,7 +178,7 @@ export default function AdminDashboard() {
         {/* Table Filter Controls */}
         <div className="admin-filter-bar">
           <div className="admin-search-input-wrap">
-            <Search size={16} className="search-box-icon" />
+            
             <input
               type="text"
               placeholder="Search reports or reporter name..."
@@ -234,7 +220,7 @@ export default function AdminDashboard() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="empty-items-state">
-            <Layers size={36} className="text-muted" />
+            
             <h3>No reports match the selected filters</h3>
             <p>Try resetting your search or filter settings.</p>
           </div>
@@ -323,7 +309,7 @@ export default function AdminDashboard() {
                             className="btn btn-ghost btn-xs"
                             title="View public page"
                           >
-                            <ExternalLink size={14} />
+                            
                           </Link>
                           <button
                             type="button"
@@ -332,7 +318,7 @@ export default function AdminDashboard() {
                             disabled={actionId === itemId}
                             title="Delete permanently"
                           >
-                            <Trash2 size={14} />
+                            
                           </button>
                         </div>
                       </td>

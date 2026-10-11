@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { fetchItems } from '../api/items';
 import ItemCard from '../components/items/ItemCard';
 import ItemFilterBar from '../components/items/ItemFilterBar';
-import { PlusCircle, Search, AlertCircle, RefreshCw, Layers } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { getUser } from '../api/auth';
 
 export default function ItemsList() {
   const [items, setItems] = useState([]);
@@ -19,7 +18,7 @@ export default function ItemsList() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('All Categories');
 
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = Boolean(getUser());
 
   const loadItems = async () => {
     setLoading(true);
@@ -46,9 +45,7 @@ export default function ItemsList() {
     setSearchParams({});
   };
 
-  // Client-side filtering & sorting
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
+  const filteredItems = items.filter((item) => {
       // Type filter
       if (typeFilter !== 'ALL' && item.type?.toUpperCase() !== typeFilter.toUpperCase()) {
         return false;
@@ -78,7 +75,6 @@ export default function ItemsList() {
 
       return true;
     });
-  }, [items, typeFilter, statusFilter, categoryFilter, search]);
 
   return (
     <div className="items-page-container">
@@ -86,7 +82,7 @@ export default function ItemsList() {
       <div className="items-header-banner">
         <div className="items-header-left">
           <div className="items-header-badge">
-            <Layers size={14} />
+            
             <span>Community Directory</span>
           </div>
           <h1 className="items-page-title">Lost & Found Catalog</h1>
@@ -99,7 +95,7 @@ export default function ItemsList() {
             to={isAuthenticated ? '/items/new' : '/login'}
             className="btn btn-primary btn-lg"
           >
-            <PlusCircle size={18} />
+            
             <span>Report an Item</span>
           </Link>
         </div>
@@ -129,7 +125,7 @@ export default function ItemsList() {
           className="btn btn-ghost btn-xs btn-refresh"
           title="Refresh items list"
         >
-          <RefreshCw size={13} className={loading ? 'spin-icon' : ''} />
+          
           <span>Refresh</span>
         </button>
       </div>
@@ -137,7 +133,7 @@ export default function ItemsList() {
       {/* Error alert */}
       {error && (
         <div className="alert alert-error">
-          <AlertCircle size={18} />
+          
           <div>{error}</div>
         </div>
       )}
@@ -152,7 +148,7 @@ export default function ItemsList() {
         /* Empty State */
         <div className="empty-items-state">
           <div className="empty-icon-wrap">
-            <Search size={36} />
+            
           </div>
           <h3>No items matched your search</h3>
           <p>
@@ -163,7 +159,7 @@ export default function ItemsList() {
               Clear All Filters
             </button>
             <Link to={isAuthenticated ? '/items/new' : '/login'} className="btn btn-primary">
-              <PlusCircle size={16} />
+              
               <span>Report New Item</span>
             </Link>
           </div>

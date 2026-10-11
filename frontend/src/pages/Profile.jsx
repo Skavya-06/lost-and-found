@@ -1,13 +1,21 @@
-import { useAuth } from '../context/AuthContext';
-import { User, Mail, Shield, KeyRound, LogOut, FileText, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { clearAuth, getUser } from '../api/auth';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Profile() {
-  const { user, isAdmin, logout } = useAuth();
+  const [user, setUser] = useState(getUser());
+  const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, []);
+
   const handleLogout = () => {
-    logout();
+    clearAuth();
+    setUser(null);
     navigate('/');
   };
 
@@ -27,7 +35,7 @@ export default function Profile() {
                 {isAdmin ? 'Administrator' : 'Standard User'}
               </span>
               <span className="badge badge-verified">
-                <CheckCircle2 size={12} /> Verified Session
+                 Verified Session
               </span>
             </div>
           </div>
@@ -36,7 +44,7 @@ export default function Profile() {
         {/* Profile Details List */}
         <div className="profile-details-grid">
           <div className="detail-item">
-            <div className="detail-icon"><User size={18} /></div>
+            <div className="detail-icon"></div>
             <div className="detail-info">
               <span className="detail-label">Full Name</span>
               <span className="detail-value">{user?.name || 'Not provided'}</span>
@@ -44,7 +52,7 @@ export default function Profile() {
           </div>
 
           <div className="detail-item">
-            <div className="detail-icon"><Mail size={18} /></div>
+            <div className="detail-icon"></div>
             <div className="detail-info">
               <span className="detail-label">Email Address</span>
               <span className="detail-value">{user?.email || 'Not provided'}</span>
@@ -52,7 +60,7 @@ export default function Profile() {
           </div>
 
           <div className="detail-item">
-            <div className="detail-icon"><Shield size={18} /></div>
+            <div className="detail-icon"></div>
             <div className="detail-info">
               <span className="detail-label">Account Role</span>
               <span className="detail-value text-capitalize">{user?.role || 'user'}</span>
@@ -60,7 +68,7 @@ export default function Profile() {
           </div>
 
           <div className="detail-item">
-            <div className="detail-icon"><KeyRound size={18} /></div>
+            <div className="detail-icon"></div>
             <div className="detail-info">
               <span className="detail-label">User Identifier</span>
               <span className="detail-value text-mono">{user?.id || user?._id || 'USR-LOCAL'}</span>
@@ -73,17 +81,17 @@ export default function Profile() {
           <h3 className="profile-actions-title">Quick Actions</h3>
           <div className="profile-btn-row">
             <Link to="/my-items" className="btn btn-secondary">
-              <FileText size={16} />
+              
               <span>Manage My Reports</span>
             </Link>
             {isAdmin && (
               <Link to="/admin" className="btn btn-primary">
-                <Shield size={16} />
+                
                 <span>Open Admin Panel</span>
               </Link>
             )}
             <button type="button" onClick={handleLogout} className="btn btn-danger">
-              <LogOut size={16} />
+              
               <span>Sign Out</span>
             </button>
           </div>

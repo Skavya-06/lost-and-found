@@ -1,64 +1,39 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  LogIn,
-  AlertCircle,
-  ShieldCheck,
-  User,
-  ArrowRight,
-  Compass,
-} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { loginUser, saveAuth } from '../api/auth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [localError, setLocalError] = useState('');
-
-  const { login, loading, error: authError, clearError } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [displayedError, setDisplayedError] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLocalError('');
-    clearError();
+    setDisplayedError('');
 
     if (!email || !password) {
-      setLocalError('Please fill in both email and password.');
+      setDisplayedError('Please fill in both email and password.');
       return;
     }
 
+    setLoading(true);
     try {
-      const result = await login(email, password);
-      // If admin, default redirect to admin dashboard unless a specific page was requested
-      if (result.user?.role === 'admin' && from === '/') {
-        navigate('/admin', { replace: true });
+      const result = await loginUser({ email, password });
+      saveAuth(result.token, result.user);
+      if (result.user?.role === 'admin') {
+        navigate('/admin');
       } else {
-        navigate(from, { replace: true });
+        navigate('/');
       }
     } catch (err) {
-      // Error handled by context and local state
-      console.error('Login error:', err);
+      setDisplayedError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Quick helper to fill demo credentials
-  const fillDemo = (demoEmail, demoPassword) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    setLocalError('');
-    clearError();
-  };
-
-  const displayedError = localError || authError;
 
   return (
     <div className="auth-page-wrapper">
@@ -66,7 +41,7 @@ export default function Login() {
         {/* Header */}
         <div className="auth-header">
           <div className="auth-icon-circle">
-            <Compass size={28} className="text-primary" />
+            
           </div>
           <h1 className="auth-title">Welcome Back</h1>
           <p className="auth-subtitle">
@@ -77,7 +52,7 @@ export default function Login() {
         {/* Error message */}
         {displayedError && (
           <div className="alert alert-error">
-            <AlertCircle size={18} className="alert-icon" />
+            
             <div className="alert-content">{displayedError}</div>
           </div>
         )}
@@ -89,7 +64,7 @@ export default function Login() {
               Email Address
             </label>
             <div className="input-wrapper">
-              <Mail size={18} className="input-icon-left" />
+              
               <input
                 id="email"
                 type="email"
@@ -110,7 +85,7 @@ export default function Login() {
               </label>
             </div>
             <div className="input-wrapper">
-              <Lock size={18} className="input-icon-left" />
+              
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -127,7 +102,7 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? 'Hide' : 'Show'}
               </button>
             </div>
           </div>
@@ -143,43 +118,18 @@ export default function Login() {
               </span>
             ) : (
               <span className="btn-loading-flex">
-                <LogIn size={18} /> Sign In
+                 Sign In
               </span>
             )}
           </button>
         </form>
-
-        {/* Demo Login Shortcuts */}
-        <div className="demo-fill-box">
-          <div className="demo-fill-title">
-            <span>Quick Demo Access (1-Click Fill)</span>
-          </div>
-          <div className="demo-buttons-row">
-            <button
-              type="button"
-              className="btn btn-outline btn-xs demo-btn"
-              onClick={() => fillDemo('user@findit.com', 'password123')}
-            >
-              <User size={13} />
-              <span>User Demo</span>
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline btn-xs demo-btn"
-              onClick={() => fillDemo('admin@findit.com', 'password123')}
-            >
-              <ShieldCheck size={13} />
-              <span>Admin Demo</span>
-            </button>
-          </div>
-        </div>
 
         {/* Footer switch to register */}
         <div className="auth-footer">
           <span>Don’t have an account yet?</span>
           <Link to="/register" className="auth-link">
             <span>Create an account</span>
-            <ArrowRight size={14} />
+            
           </Link>
         </div>
       </div>

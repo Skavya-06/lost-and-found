@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Calendar, Tag, ArrowRight, Clock } from 'lucide-react';
 
 export default function ItemCard({ item }) {
   const isLost = item.type === 'LOST';
@@ -48,11 +47,11 @@ export default function ItemCard({ item }) {
       <div className="item-card-body">
         <div className="item-card-meta-top">
           <span className="item-card-category">
-            <Tag size={12} />
+            
             <span>{item.category || 'General'}</span>
           </span>
           <span className="item-card-date">
-            <Calendar size={12} />
+            
             <span>{item.date || 'Recent'}</span>
           </span>
         </div>
@@ -66,7 +65,7 @@ export default function ItemCard({ item }) {
         </p>
 
         <div className="item-card-location">
-          <MapPin size={14} className="location-pin-icon" />
+          
           <span className="location-text">{item.location || 'Campus'}</span>
         </div>
       </div>
@@ -75,7 +74,7 @@ export default function ItemCard({ item }) {
       <div className="item-card-footer">
         <Link to={`/items/${itemId}`} className="btn-view-details">
           <span>View Details & Claim</span>
-          <ArrowRight size={14} />
+          
         </Link>
       </div>
     </div>

@@ -1,26 +1,17 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import {
-  Search,
-  PlusCircle,
-  ShieldCheck,
-  CheckCircle2,
-  Clock,
-  ArrowRight,
-  Sparkles,
-  Users,
-  Compass,
-} from 'lucide-react';
+import { getUser } from '../api/auth';
 
 export default function Home() {
-  const { isAuthenticated, user, isAdmin } = useAuth();
+  const user = getUser();
+  const isAuthenticated = Boolean(user);
+  const isAdmin = user?.role === 'admin';
 
   return (
     <div className="home-page-container">
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-badge">
-          <Sparkles size={14} className="hero-sparkle" />
+          
           <span>Campus & Community Lost and Found Hub</span>
         </div>
 
@@ -36,11 +27,11 @@ export default function Home() {
 
         <div className="hero-cta-group">
           <Link to="/items" className="btn btn-primary btn-lg">
-            <Search size={18} />
+            
             <span>Browse Lost & Found</span>
           </Link>
           <Link to={isAuthenticated ? '/items/new' : '/login'} className="btn btn-secondary btn-lg">
-            <PlusCircle size={18} />
+            
             <span>Report an Item</span>
           </Link>
         </div>
@@ -51,7 +42,7 @@ export default function Home() {
             <span>Welcome back, <strong>{user?.name}</strong>!</span>
             {isAdmin && <span className="badge badge-admin ml-2">Admin privileges active</span>}
             <Link to={isAdmin ? '/admin' : '/my-items'} className="hero-user-banner-link">
-              Go to {isAdmin ? 'Admin Dashboard' : 'My Reports'} <ArrowRight size={14} />
+              Go to {isAdmin ? 'Admin Dashboard' : 'My Reports'} 
             </Link>
           </div>
         )}
@@ -89,7 +80,7 @@ export default function Home() {
           <div className="step-card">
             <div className="step-number">01</div>
             <div className="step-icon-box">
-              <PlusCircle size={22} />
+              
             </div>
             <h3 className="step-heading">Post a Report</h3>
             <p className="step-body">
@@ -100,7 +91,7 @@ export default function Home() {
           <div className="step-card">
             <div className="step-number">02</div>
             <div className="step-icon-box">
-              <Search size={22} />
+              
             </div>
             <h3 className="step-heading">Search & Filter</h3>
             <p className="step-body">
@@ -111,7 +102,7 @@ export default function Home() {
           <div className="step-card">
             <div className="step-number">03</div>
             <div className="step-icon-box">
-              <ShieldCheck size={22} />
+              
             </div>
             <h3 className="step-heading">Verify & Claim</h3>
             <p className="step-body">
@@ -122,7 +113,7 @@ export default function Home() {
           <div className="step-card">
             <div className="step-number">04</div>
             <div className="step-icon-box">
-              <CheckCircle2 size={22} />
+              
             </div>
             <h3 className="step-heading">Item Reunited</h3>
             <p className="step-body">
@@ -136,28 +127,28 @@ export default function Home() {
       <section className="features-section">
         <div className="features-grid">
           <div className="feature-item">
-            <div className="feature-icon"><ShieldCheck size={20} /></div>
+            <div className="feature-icon"></div>
             <div>
               <h4 className="feature-title">Role-Based Access Control</h4>
               <p className="feature-text">JWT authenticated access protecting user personal contact details.</p>
             </div>
           </div>
           <div className="feature-item">
-            <div className="feature-icon"><Clock size={20} /></div>
+            <div className="feature-icon"></div>
             <div>
               <h4 className="feature-title">Live Status Updates</h4>
               <p className="feature-text">Real-time status tracking across OPEN, CLAIMED, and CLOSED states.</p>
             </div>
           </div>
           <div className="feature-item">
-            <div className="feature-icon"><Users size={20} /></div>
+            <div className="feature-icon"></div>
             <div>
               <h4 className="feature-title">Admin Moderation</h4>
               <p className="feature-text">Designated admins review reports, maintain community safety, and manage spam.</p>
             </div>
           </div>
           <div className="feature-item">
-            <div className="feature-icon"><Compass size={20} /></div>
+            <div className="feature-icon"></div>
             <div>
               <h4 className="feature-title">Location Tagging</h4>
               <p className="feature-text">Pinpoint library, cafeteria, campus grounds, or public transport transit stops.</p>
