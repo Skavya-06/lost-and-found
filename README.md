@@ -77,11 +77,9 @@ VITE_API_URL=http://localhost:5000/api
 
 Never commit a real `.env` file. Commit only `.env.example`.
 
-## Screenshots
 
-Add screenshots after the pages are working.
 
 ## Deployment links
 
-- Frontend:
-- Backend:
+- Frontend: https://lost-and-found-six.vercel.app
+- Backend: https://lost-and-found-y00t.onrender.com
