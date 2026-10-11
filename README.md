@@ -19,9 +19,9 @@ A full-stack app where users report lost or found items, and an admin can manage
 
 ## Team members
 
-- Team lead: Kavya — roll number
-- Anshika — roll number
-- Bannsal — roll number
+- Team lead: Kavya — 42
+- Anshika Gupta — 14
+- Ekansh Bansal — 32
 
 ## API endpoints
 
