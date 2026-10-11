@@ -1,4 +1,3 @@
-import { Search, Filter, X } from 'lucide-react';
 
 export const CATEGORIES = [
   'All Categories',
@@ -31,7 +30,7 @@ export default function ItemFilterBar({
     <div className="filter-bar-container">
       {/* Search Bar */}
       <div className="filter-search-box">
-        <Search size={18} className="search-box-icon" />
+        
         <input
           type="text"
           className="search-box-input"
@@ -46,7 +45,7 @@ export default function ItemFilterBar({
             onClick={() => setSearch('')}
             aria-label="Clear search"
           >
-            <X size={16} />
+            
           </button>
         )}
       </div>
@@ -114,7 +113,7 @@ export default function ItemFilterBar({
         {/* Reset Filters */}
         {hasActiveFilters && (
           <button type="button" onClick={onReset} className="btn btn-ghost btn-sm btn-reset-filters">
-            <X size={14} />
+            
             <span>Reset</span>
           </button>
         )}

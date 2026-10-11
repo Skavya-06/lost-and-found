@@ -1,49 +1,22 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-/**
- * Custom API Client with automatic JWT injection, error handling,
- * and smart fallback to offline/demo storage when backend is unreachable.
- */
-export async function apiRequest(endpoint, { method = 'GET', body, headers = {}, token } = {}) {
-  const activeToken = token || localStorage.getItem('findit_token');
+export async function apiRequest(endpoint, { method = "GET", body } = {}) {
+  const token = localStorage.getItem("findit_token");
 
-  const config = {
+  const response = await fetch(API_BASE_URL + endpoint, {
     method,
     headers: {
-      'Content-Type': 'application/json',
-      ...(activeToken ? { Authorization: `Bearer ${activeToken}` } : {}),
-      ...headers,
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: "Bearer " + token } : {}),
     },
-  };
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-  if (body) {
-    config.body = JSON.stringify(body);
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Request failed");
   }
 
-  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-
-  try {
-    const response = await fetch(url, config);
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      const errorMsg = data.message || `Request failed with status ${response.status}`;
-      const error = new Error(errorMsg);
-      error.status = response.status;
-      error.data = data;
-      throw error;
-    }
-
-    return data;
-  } catch (error) {
-    // If backend is down or unreachable, allow demo mock mode for testing
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      console.warn(`[API] Server unreachable at ${url}. Operating with client fallback.`);
-      error.isNetworkError = true;
-      error.message = 'Backend server is not running at ' + API_BASE_URL + '. Check your server connection.';
-    }
-    throw error;
-  }
+  return data;
 }
-
-export { API_BASE_URL };

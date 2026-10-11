@@ -1,26 +1,22 @@
-import { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import {
-  Compass,
-  Search,
-  PlusCircle,
-  FolderClock,
-  ShieldCheck,
-  User,
-  LogOut,
-  Menu,
-  X,
-  Sparkles,
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { clearAuth, getUser } from '../../api/auth';
 
 export default function Navbar() {
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const [user, setUser] = useState(getUser());
+  const isAuthenticated = Boolean(user);
+  const isAdmin = user?.role === 'admin';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    setUser(getUser());
+  }, [location.pathname]);
 
   const handleLogout = () => {
-    logout();
+    clearAuth();
+    setUser(null);
     setMobileMenuOpen(false);
     navigate('/');
   };
@@ -33,7 +29,7 @@ export default function Navbar() {
         {/* Brand Logo */}
         <Link to="/" className="brand-logo" onClick={closeMenu}>
           <div className="logo-icon-wrapper">
-            <Compass className="logo-icon" size={24} />
+            
           </div>
           <div className="brand-text">
             <span className="brand-name">FindIt</span>
@@ -47,18 +43,18 @@ export default function Navbar() {
             Home
           </NavLink>
           <NavLink to="/items" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            <Search size={16} />
+            
             <span>Browse Items</span>
           </NavLink>
 
           {isAuthenticated && (
             <>
               <NavLink to="/items/new" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-                <PlusCircle size={16} />
+                
                 <span>Report Item</span>
               </NavLink>
               <NavLink to="/my-items" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-                <FolderClock size={16} />
+                
                 <span>My Reports</span>
               </NavLink>
             </>
@@ -66,7 +62,7 @@ export default function Navbar() {
 
           {isAdmin && (
             <NavLink to="/admin" className={({ isActive }) => (isActive ? 'nav-link active admin-link' : 'nav-link admin-link')}>
-              <ShieldCheck size={16} />
+              
               <span>Admin Panel</span>
               <span className="badge badge-admin">Admin</span>
             </NavLink>
@@ -94,7 +90,7 @@ export default function Navbar() {
                 className="btn btn-ghost btn-sm"
                 title="Log out"
               >
-                <LogOut size={16} />
+                
                 <span>Logout</span>
               </button>
             </div>
@@ -104,7 +100,7 @@ export default function Navbar() {
                 Sign In
               </Link>
               <Link to="/register" className="btn btn-primary btn-sm">
-                <Sparkles size={14} />
+                
                 <span>Get Started</span>
               </Link>
             </div>
@@ -118,7 +114,7 @@ export default function Navbar() {
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle navigation menu"
         >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {mobileMenuOpen ? 'Close' : 'Menu'}
         </button>
       </div>
 
@@ -130,22 +126,22 @@ export default function Navbar() {
               Home
             </NavLink>
             <NavLink to="/items" onClick={closeMenu} className="mobile-nav-link">
-              <Search size={18} />
+              
               <span>Browse Items</span>
             </NavLink>
 
             {isAuthenticated && (
               <>
                 <NavLink to="/items/new" onClick={closeMenu} className="mobile-nav-link">
-                  <PlusCircle size={18} />
+                  
                   <span>Report Item</span>
                 </NavLink>
                 <NavLink to="/my-items" onClick={closeMenu} className="mobile-nav-link">
-                  <FolderClock size={18} />
+                  
                   <span>My Reports</span>
                 </NavLink>
                 <NavLink to="/profile" onClick={closeMenu} className="mobile-nav-link">
-                  <User size={18} />
+                  
                   <span>My Profile ({user?.name})</span>
                 </NavLink>
               </>
@@ -153,7 +149,7 @@ export default function Navbar() {
 
             {isAdmin && (
               <NavLink to="/admin" onClick={closeMenu} className="mobile-nav-link admin-link">
-                <ShieldCheck size={18} />
+                
                 <span>Admin Panel</span>
                 <span className="badge badge-admin">Admin</span>
               </NavLink>
@@ -167,7 +163,7 @@ export default function Navbar() {
                 onClick={handleLogout}
                 className="btn btn-danger w-full mt-2"
               >
-                <LogOut size={18} />
+                
                 <span>Logout ({user?.name})</span>
               </button>
             ) : (
@@ -176,7 +172,7 @@ export default function Navbar() {
                   Sign In
                 </Link>
                 <Link to="/register" onClick={closeMenu} className="btn btn-primary w-full">
-                  <Sparkles size={16} />
+                  
                   <span>Create Account</span>
                 </Link>
               </div>

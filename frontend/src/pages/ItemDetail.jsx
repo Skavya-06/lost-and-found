@@ -1,29 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchItemById, updateItemStatus, deleteItem } from '../api/items';
-import { useAuth } from '../context/AuthContext';
-import {
-  MapPin,
-  Calendar,
-  Tag,
-  ArrowLeft,
-  ShieldCheck,
-  User,
-  Mail,
-  Phone,
-  Trash2,
-  Edit3,
-  CheckCircle2,
-  AlertCircle,
-  HelpCircle,
-  Share2,
-  Clock,
-} from 'lucide-react';
+import { getUser } from '../api/auth';
 
 export default function ItemDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated, isAdmin } = useAuth();
+  const user = getUser();
+  const isAuthenticated = Boolean(user);
+  const isAdmin = user?.role === 'admin';
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -115,11 +100,11 @@ export default function ItemDetail() {
     return (
       <div className="item-detail-error-container">
         <div className="alert alert-error">
-          <AlertCircle size={20} />
+          
           <div>{error || 'Item was not found or has been removed.'}</div>
         </div>
         <Link to="/items" className="btn btn-secondary mt-3">
-          <ArrowLeft size={16} /> Back to Catalog
+           Back to Catalog
         </Link>
       </div>
     );
@@ -132,7 +117,7 @@ export default function ItemDetail() {
       {/* Top Breadcrumb & Actions */}
       <div className="detail-top-bar">
         <Link to="/items" className="btn btn-ghost btn-sm">
-          <ArrowLeft size={16} />
+          
           <span>Back to All Items</span>
         </Link>
 
@@ -141,7 +126,7 @@ export default function ItemDetail() {
           {isOwner && (
             <>
               <Link to={`/items/${id}/edit`} className="btn btn-secondary btn-sm">
-                <Edit3 size={15} />
+                
                 <span>Edit Report</span>
               </Link>
               <button
@@ -150,7 +135,7 @@ export default function ItemDetail() {
                 className="btn btn-danger btn-sm"
                 disabled={actionLoading}
               >
-                <Trash2 size={15} />
+                
                 <span>Delete</span>
               </button>
             </>
@@ -164,7 +149,7 @@ export default function ItemDetail() {
               className="btn btn-danger btn-sm"
               disabled={actionLoading}
             >
-              <Trash2 size={15} />
+              
               <span>Admin Delete</span>
             </button>
           )}
@@ -195,7 +180,7 @@ export default function ItemDetail() {
           {isAdmin && (
             <div className="admin-moderation-panel">
               <div className="admin-mod-header">
-                <ShieldCheck size={18} className="text-warning" />
+                
                 <h4>Admin Status Control</h4>
               </div>
               <p className="admin-mod-desc">
@@ -228,7 +213,7 @@ export default function ItemDetail() {
               </span>
               {getStatusBadge(item.status)}
               <span className="badge badge-category">
-                <Tag size={12} />
+                
                 <span>{item.category || 'General'}</span>
               </span>
             </div>
@@ -237,11 +222,11 @@ export default function ItemDetail() {
 
             <div className="detail-meta-pills">
               <div className="meta-pill">
-                <MapPin size={16} className="text-secondary" />
+                
                 <span>{item.location || 'Location Not Specified'}</span>
               </div>
               <div className="meta-pill">
-                <Calendar size={16} className="text-accent" />
+                
                 <span>Date: {item.date || 'Recent'}</span>
               </div>
             </div>
@@ -272,12 +257,12 @@ export default function ItemDetail() {
             {isAuthenticated ? (
               <div className="contact-revealed-box">
                 <div className="contact-detail-row">
-                  <Mail size={16} />
+                  
                   <span>{item.contact || item.user?.email || 'Contact provided upon claim'}</span>
                 </div>
                 {item.phone && (
                   <div className="contact-detail-row">
-                    <Phone size={16} />
+                    
                     <span>{item.phone}</span>
                   </div>
                 )}
@@ -286,13 +271,13 @@ export default function ItemDetail() {
                   className="btn btn-primary btn-block mt-3"
                   onClick={() => setShowClaimModal(true)}
                 >
-                  <CheckCircle2 size={16} />
+                  
                   <span>{isLost ? 'I Found This Item (Contact Owner)' : 'Claim This Item (Prove Ownership)'}</span>
                 </button>
               </div>
             ) : (
               <div className="contact-login-prompt">
-                <HelpCircle size={20} className="text-primary" />
+                
                 <div>
                   <h4>Contact Details Protected</h4>
                   <p>Please sign in with your student or campus account to view contact info or file a claim.</p>
@@ -320,7 +305,7 @@ export default function ItemDetail() {
 
             {claimSuccess ? (
               <div className="claim-success-box">
-                <CheckCircle2 size={36} className="text-success" />
+                
                 <h4>Inquiry Sent Successfully!</h4>
                 <p>
                   The reporter has received your claim request along with your verified contact information.

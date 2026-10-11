@@ -8,7 +8,7 @@ export async function fetchItems(params = {}) {
   if (params.category && params.category !== "ALL") query.set("category", params.category);
 
   const queryString = query.toString() ? `?${query.toString()}` : "";
-  const data = await apiRequest(`/items${queryString}`);
+  const data = await apiRequest("/items" + queryString);
   return Array.isArray(data) ? data : data.items || [];
 }
 
@@ -17,33 +17,22 @@ export async function fetchMyItems() {
   return Array.isArray(data) ? data : data.items || [];
 }
 
-export async function fetchItemById(id) {
-  return apiRequest(`/items/${id}`);
+export function fetchItemById(id) {
+  return apiRequest("/items/" + id);
 }
 
-export async function createItem(itemData) {
-  return apiRequest("/items", {
-    method: "POST",
-    body: itemData,
-  });
+export function createItem(itemData) {
+  return apiRequest("/items", { method: "POST", body: itemData });
 }
 
-export async function updateItem(id, updateData) {
-  return apiRequest(`/items/${id}`, {
-    method: "PUT",
-    body: updateData,
-  });
+export function updateItem(id, updateData) {
+  return apiRequest("/items/" + id, { method: "PUT", body: updateData });
 }
 
-export async function updateItemStatus(id, status) {
-  return apiRequest(`/items/${id}/status`, {
-    method: "PUT",
-    body: { status },
-  });
+export function updateItemStatus(id, status) {
+  return apiRequest("/items/" + id + "/status", { method: "PUT", body: { status } });
 }
 
-export async function deleteItem(id) {
-  return apiRequest(`/items/${id}`, {
-    method: "DELETE",
-  });
+export function deleteItem(id) {
+  return apiRequest("/items/" + id, { method: "DELETE" });
 }

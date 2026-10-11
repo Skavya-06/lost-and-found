@@ -1,21 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { createItem, fetchItemById, updateItem } from '../api/items';
-import { useAuth } from '../context/AuthContext';
+import { getUser } from '../api/auth';
 import { CATEGORIES } from '../components/items/ItemFilterBar';
-import {
-  PlusCircle,
-  Edit3,
-  MapPin,
-  Calendar,
-  Tag,
-  FileText,
-  Mail,
-  Image,
-  ArrowLeft,
-  AlertCircle,
-  Sparkles,
-} from 'lucide-react';
 
 const PRESET_IMAGES = [
   { label: 'Backpack', url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
@@ -32,7 +19,7 @@ export default function ItemForm() {
   const { id } = useParams();
   const isEditing = Boolean(id);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const user = getUser();
 
   const [type, setType] = useState('LOST');
   const [title, setTitle] = useState('');
@@ -50,6 +37,10 @@ export default function ItemForm() {
 
   // If editing, load initial data
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (isEditing) {
       async function loadExisting() {
         setFetching(true);
@@ -72,7 +63,7 @@ export default function ItemForm() {
       }
       loadExisting();
     }
-  }, [id, isEditing, user]);
+  }, [id, isEditing]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,7 +92,7 @@ export default function ItemForm() {
         await updateItem(id, payload);
         navigate(`/items/${id}`, { replace: true });
       } else {
-        const created = await createItem(payload, user);
+        const created = await createItem(payload);
         const newId = created._id || created.id;
         navigate(`/items/${newId}`, { replace: true });
       }
@@ -127,7 +118,7 @@ export default function ItemForm() {
         {/* Header */}
         <div className="form-header-bar">
           <Link to="/items" className="btn btn-ghost btn-sm">
-            <ArrowLeft size={16} />
+            
             <span>Cancel</span>
           </Link>
           <div className="form-title-group">
@@ -145,7 +136,7 @@ export default function ItemForm() {
         {/* Error Alert */}
         {error && (
           <div className="alert alert-error">
-            <AlertCircle size={18} />
+            
             <div>{error}</div>
           </div>
         )}
@@ -184,7 +175,7 @@ export default function ItemForm() {
                 Item Title *
               </label>
               <div className="input-wrapper">
-                <FileText size={18} className="input-icon-left" />
+                
                 <input
                   id="title"
                   type="text"
@@ -202,7 +193,7 @@ export default function ItemForm() {
                 Category *
               </label>
               <div className="input-wrapper">
-                <Tag size={18} className="input-icon-left" />
+                
                 <select
                   id="category"
                   className="form-input with-left-icon"
@@ -226,7 +217,7 @@ export default function ItemForm() {
                 Location (Building, Room, Transit) *
               </label>
               <div className="input-wrapper">
-                <MapPin size={18} className="input-icon-left" />
+                
                 <input
                   id="location"
                   type="text"
@@ -244,7 +235,7 @@ export default function ItemForm() {
                 Date {type === 'LOST' ? 'Lost' : 'Found'} *
               </label>
               <div className="input-wrapper">
-                <Calendar size={18} className="input-icon-left" />
+                
                 <input
                   id="date"
                   type="date"
@@ -279,7 +270,7 @@ export default function ItemForm() {
               Contact Email / Phone (Shown to verified users)
             </label>
             <div className="input-wrapper">
-              <Mail size={18} className="input-icon-left" />
+              
               <input
                 id="contact"
                 type="text"
@@ -297,7 +288,7 @@ export default function ItemForm() {
               Photo URL / Visual Representation
             </label>
             <div className="input-wrapper">
-              <Image size={18} className="input-icon-left" />
+              
               <input
                 id="imageUrl"
                 type="url"
@@ -337,10 +328,7 @@ export default function ItemForm() {
                   <span className="spinner-sm"></span> Saving...
                 </span>
               ) : (
-                <span className="btn-loading-flex">
-                  {isEditing ? <Edit3 size={18} /> : <PlusCircle size={18} />}
-                  <span>{isEditing ? 'Save Changes' : 'Publish Report'}</span>
-                </span>
+                <span>{isEditing ? 'Save Changes' : 'Publish Report'}</span>
               )}
             </button>
           </div>

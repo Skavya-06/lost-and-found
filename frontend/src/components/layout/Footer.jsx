@@ -1,4 +1,3 @@
-import { Compass, Heart, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
@@ -8,7 +7,7 @@ export default function Footer() {
         <div className="footer-col brand-col">
           <div className="brand-logo footer-brand">
             <div className="logo-icon-wrapper">
-              <Compass className="logo-icon" size={20} />
+              
             </div>
             <span className="brand-name">FindIt</span>
           </div>
@@ -17,7 +16,7 @@ export default function Footer() {
             their lost belongings quickly, safely, and transparently.
           </p>
           <div className="footer-badge">
-            <Shield size={14} />
+            
             <span>Role-Based Secure JWT Auth</span>
           </div>
         </div>
@@ -69,7 +68,7 @@ export default function Footer() {
       <div className="footer-bottom">
         <p className="copyright-text">
           &copy; {new Date().getFullYear()} FindIt System. Built with{' '}
-          <Heart size={13} className="inline-heart" /> for campus & community safety.
+           for campus & community safety.
         </p>
       </div>
     </footer>

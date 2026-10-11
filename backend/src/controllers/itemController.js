@@ -1,30 +1,23 @@
 const mongoose = require("mongoose");
 const Item = require("../models/Item");
 
-// @desc    Get all items with optional filters & search (Admin list / Catalog)
-// @route   GET /api/items
-// @access  Public
 const getItems = async (req, res) => {
   try {
     const { type, status, category, search } = req.query;
     const filter = {};
 
-    // Filter by type (LOST or FOUND)
     if (type && type.toUpperCase() !== "ALL") {
       filter.type = type.toUpperCase();
     }
 
-    // Filter by status (OPEN, CLAIMED, CLOSED)
     if (status && status.toUpperCase() !== "ALL") {
       filter.status = status.toUpperCase();
     }
 
-    // Filter by category
     if (category && category !== "ALL" && category !== "All Categories") {
       filter.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
 
-    // Search query matching title, description, or location
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), "i");
       filter.$or = [
@@ -45,9 +38,6 @@ const getItems = async (req, res) => {
   }
 };
 
-// @desc    Get items created by current logged-in user
-// @route   GET /api/items/mine
-// @access  Private (Logged-in user)
 const getMyItems = async (req, res) => {
   try {
     const items = await Item.find({ user: req.user.id })
@@ -61,9 +51,6 @@ const getMyItems = async (req, res) => {
   }
 };
 
-// @desc    Get single item details by ID
-// @route   GET /api/items/:id
-// @access  Public
 const getItemById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -84,9 +71,6 @@ const getItemById = async (req, res) => {
   }
 };
 
-// @desc    Create a new item report
-// @route   POST /api/items
-// @access  Private (Logged-in user)
 const createItem = async (req, res) => {
   try {
     const {
@@ -137,9 +121,6 @@ const createItem = async (req, res) => {
   }
 };
 
-// @desc    Update an item report
-// @route   PUT /api/items/:id
-// @access  Private (Owner or Admin)
 const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -153,7 +134,6 @@ const updateItem = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    // Check authorization: Owner or Admin
     const isOwner = item.user.toString() === req.user.id.toString();
     const isAdmin = req.user.role === "admin";
 
@@ -199,9 +179,6 @@ const updateItem = async (req, res) => {
   }
 };
 
-// @desc    Update item status (Admin quick-update)
-// @route   PUT /api/items/:id/status
-// @access  Private (Admin)
 const updateItemStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -233,9 +210,6 @@ const updateItemStatus = async (req, res) => {
   }
 };
 
-// @desc    Delete item report
-// @route   DELETE /api/items/:id
-// @access  Private (Owner or Admin)
 const deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -249,7 +223,6 @@ const deleteItem = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    // Check authorization: Owner or Admin
     const isOwner = item.user.toString() === req.user.id.toString();
     const isAdmin = req.user.role === "admin";
 

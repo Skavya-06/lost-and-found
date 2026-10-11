@@ -46,7 +46,6 @@ backend/
 │   ├── routes/
 │   │   ├── authRoutes.js         # /api/auth routes
 │   │   └── itemRoutes.js         # /api/items routes
-│   ├── seed.js                   # Seed script for test users & items
 │   └── server.js                 # Express app entrypoint
 ├── .env.example
 ├── .env
@@ -74,17 +73,7 @@ JWT_SECRET=supersecretlostandfoundjwtkey_2026
 ```
 *(For MongoDB Atlas, replace `MONGO_URI` with your Atlas connection string).*
 
-### 3. (Optional) Seed Sample Data
-Populates the database with demo users and sample lost/found items:
-```bash
-npm run seed
-```
-
-**Pre-seeded Test Accounts:**
-- **Admin**: `admin@findit.com` / `password123`
-- **User**: `user@findit.com` / `password123`
-
-### 4. Start the Server
+### 3. Start the Server
 Development mode (with auto-reload via nodemon):
 ```bash
 npm run dev
